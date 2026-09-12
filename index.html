@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zufälliger Schlüssel Generator</title>
+<style>
+  :root {
+    --bg: #ece7db;
+    --card-bg: #ffffff;
+    --border: #17140f;
+    --text-primary: #17140f;
+    --text-secondary: #6b665a;
+    --accent: #c1502f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Courier New", Courier, monospace;
+    background: var(--bg);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 6px 6px 0 var(--accent);
+  }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 30px;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  input[type="number"] {
+    width: 70px;
+    padding: 8px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
+  }
+  button {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+  }
+  button:hover { background: var(--bg); }
+  button:active { transform: scale(0.97); }
+  #copy-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  #copy-btn:hover { background: #a5432a; }
+  #output {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 14px;
+    word-break: break-all;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 20px;
+  }
+  #copied-msg {
+    font-size: 12px;
+    color: var(--accent);
+    margin: 10px 0 0;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    visibility: hidden;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <p class="eyebrow">manuel · vienna · dev</p>
+    <h1>random key~</h1>
+    <div class="row">
+      <label>Bytes
+        <input type="number" id="bytes" value="32" min="1" max="256">
+      </label>
+      <button id="gen">↻ neu</button>
+    </div>
+    <div id="output"></div>
+    <button id="copy-btn">⧉ kopieren</button>
+    <p id="copied-msg">kopiert</p>
+  </div>
+
+<script>
+function generateKey(numBytes) {
+  const arr = new Uint8Array(numBytes);
+  crypto.getRandomValues(arr);
+  let binary = '';
+  arr.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+function render() {
+  const bytesInput = document.getElementById('bytes');
+  let n = parseInt(bytesInput.value, 10);
+  if (isNaN(n) || n < 1) n = 32;
+  if (n > 256) n = 256;
+  bytesInput.value = n;
+  document.getElementById('output').textContent = generateKey(n);
+  document.getElementById('copied-msg').style.visibility = 'hidden';
+}
+
+document.getElementById('gen').addEventListener('click', render);
+document.getElementById('bytes').addEventListener('change', render);
+
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  const text = document.getElementById('output').textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    document.getElementById('copied-msg').style.visibility = 'visible';
+  } catch (e) {
+    document.getElementById('copied-msg').textContent = 'kopieren fehlgeschlagen';
+    document.getElementById('copied-msg').style.visibility = 'visible';
+  }
+});
+
+render();
+</script>
+</body>
+</html>
