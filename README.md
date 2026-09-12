@@ -8,7 +8,8 @@ Teil der [manuel.tools](https://manuel.tools) Toolbox. Kategorie: `dev`.
 
 - Erzeugt Zufallsbytes über `crypto.getRandomValues()` (Web Crypto API)
 - Ausgabe als Base64, base64url (`-`/`_`, ohne Padding) oder Hex — Umschalten kodiert
-  denselben Schlüssel neu, es wird kein neuer erzeugt
+  denselben Schlüssel neu, es wird kein neuer erzeugt. Unter dem Umschalter steht eine
+  Zeile, wofür das jeweilige Format gedacht ist
 - Byte-Länge einstellbar (1–256, Default 32), Presets für 16 / 32 / 64
 - Entropie-Anzeige in Bit, Warnung unterhalb von 16 Bytes
 - Die letzten 3 Schlüssel der Sitzung, gekürzt und mit eigenem Copy-Button —
@@ -23,6 +24,21 @@ Teil der [manuel.tools](https://manuel.tools) Toolbox. Kategorie: `dev`.
 python3 -m http.server 8000
 # → http://localhost:8000
 ```
+
+## Tests
+
+```bash
+node scripts/smoke-test.mjs
+```
+
+Kein Build-Step, keine Dependencies — blankes Node genügt. Der Test liest das echte
+`index.html`, schneidet das Inline-Script heraus und führt es mit einem minimalen
+DOM-Stub aus. Geprüft werden Syntax, die Constraints (kein `Math.random`, kein
+Storage, keine externen Ressourcen), Ausgabelängen für 1 / 32 / 256 Byte, alle drei
+Zeichensätze, die Byte-Eingabe inklusive Randfälle und das History-Limit.
+
+Läuft in CI bei jedem Push und jedem Pull Request. Der Deploy-Job startet erst,
+wenn der Test grün ist.
 
 ## Deployment
 
