@@ -22,9 +22,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Nur die App veroeffentlichen. Mit path: '.' landeten auch CLAUDE.md,
+      # SETUP.md und prompts/ auf der Live-Site. Neue statische Assets muessen
+      # hier bewusst ergaenzt werden — Allowlist, nicht Ausschlussliste.
+      - name: Publish-Verzeichnis aufbauen
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          echo "Inhalt des Pages-Artefakts:"
+          find _site -type f | sort
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

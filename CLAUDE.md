@@ -30,9 +30,20 @@ GitHub Pages via `.github/workflows/deploy.yml`. Push auf `main` → live auf `i
 - [x] History der letzten 3 Keys in der Session (nur In-Memory, nicht persistiert)
 
 Offen aus dem Review in Issue #2:
-- [ ] `valueAsNumber` statt `parseInt` für die Byte-Eingabe (Finding 4)
+- [x] `valueAsNumber` statt `parseInt` für die Byte-Eingabe (Finding 4)
 - [ ] Smoke-Test vor dem Deploy (Finding 5)
-- [ ] Pages-Artefakt auf die App beschränken statt `path: '.'` (Finding 6)
+- [x] Pages-Artefakt auf die App beschränken statt `path: '.'` (Finding 6)
+
+## Byte-Eingabe
+`valueAsNumber`, nicht `parseInt` — letzteres liest `1e2` als 1 und schneidet
+Dezimalstellen still ab. Regel: leeres oder unlesbares Feld → Default 32; ein
+lesbarer Wert wird gerundet und auf 1–256 geklemmt. „Außerhalb des Bereichs" und
+„gar nichts eingegeben" sind bewusst zwei verschiedene Fälle.
+
+## Pages-Artefakt
+`deploy.yml` baut ein `_site/` und lädt nur das hoch. Neue statische Assets
+müssen dort bewusst ergänzt werden — Allowlist, damit nicht versehentlich
+wieder Doku und Prompts auf der Live-Site landen.
 
 ## Dark-Mode-Palette
 Im Dark Mode trägt der Akzent **dunkle** Schrift (`--on-accent: #17140f`), nicht weiße —
