@@ -67,6 +67,7 @@ const el = (id = '', attrs = {}) => {
 
 const nodes = {
   bytes: el('bytes'), output: el('output'), entropy: el('entropy'),
+  'format-hint': el('format-hint'),
   'weak-warning': el('weak-warning'), 'copied-msg': el('copied-msg'),
   'history-wrap': el('history-wrap'), history: el('history'),
   gen: el('gen'), 'copy-btn': el('copy-btn'),
@@ -127,6 +128,18 @@ check('Entropie-Zeile bei 32 Byte', nodes.entropy.textContent === '256 bit entro
 check('keine Warnung bei 32 Byte', nodes['weak-warning'].hidden === true);
 setBytes(8);
 check('Warnung bei 8 Byte', nodes['weak-warning'].hidden === false);
+
+// --- 7b. Format-Hinweise --------------------------------------------------
+const HINTS = {
+  base64: 'standard · env-dateien, configs',
+  base64url: 'url-sicher · jwt, links, dateinamen',
+  hex: 'nur 0-9a-f · wenn ein tool hex verlangt',
+};
+for (const [fmt, expected] of Object.entries(HINTS)) {
+  pick(fmt);
+  check(`Hinweis fuer ${fmt}`, nodes['format-hint'].textContent === expected, nodes['format-hint'].textContent);
+}
+pick('base64');
 
 // --- 8. History -------------------------------------------------------------
 setBytes(32);

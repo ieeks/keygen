@@ -8,7 +8,8 @@ Teil der [manuel.tools](https://manuel.tools) Toolbox. Kategorie: `dev`.
 
 - Erzeugt Zufallsbytes über `crypto.getRandomValues()` (Web Crypto API)
 - Ausgabe als Base64, base64url (`-`/`_`, ohne Padding) oder Hex — Umschalten kodiert
-  denselben Schlüssel neu, es wird kein neuer erzeugt
+  denselben Schlüssel neu, es wird kein neuer erzeugt. Unter dem Umschalter steht eine
+  Zeile, wofür das jeweilige Format gedacht ist
 - Byte-Länge einstellbar (1–256, Default 32), Presets für 16 / 32 / 64
 - Entropie-Anzeige in Bit, Warnung unterhalb von 16 Bytes
 - Die letzten 3 Schlüssel der Sitzung, gekürzt und mit eigenem Copy-Button —

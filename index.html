@@ -132,6 +132,12 @@
     line-height: 1.6;
     min-height: 20px;
   }
+  #format-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    margin: 8px 0 0;
+  }
   #entropy {
     font-size: 12px;
     color: var(--text-secondary);
@@ -203,11 +209,12 @@
 
     <div class="field">
       <span class="field-label" id="format-label">Format</span>
-      <div class="segmented" role="group" aria-labelledby="format-label">
+      <div class="segmented" role="group" aria-labelledby="format-label" aria-describedby="format-hint">
         <button type="button" class="is-active" data-format="base64" aria-pressed="true">base64</button>
         <button type="button" data-format="base64url" aria-pressed="false">base64url</button>
         <button type="button" data-format="hex" aria-pressed="false">hex</button>
       </div>
+      <p id="format-hint"></p>
     </div>
 
     <output id="output" aria-label="Generierter Schlüssel"></output>
@@ -237,15 +244,27 @@ const toBase64 = bytes => {
   return btoa(binary);
 };
 
+// Jedes Format mit einem Hinweis, wann man es nimmt. Alle drei kodieren
+// dieselben Bytes — die Wahl aendert die Schreibweise, nicht die Staerke.
 const FORMATS = {
-  base64: toBase64,
-  base64url: bytes => toBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
-  hex: bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+  base64: {
+    encode: toBase64,
+    hint: 'standard · env-dateien, configs'
+  },
+  base64url: {
+    encode: bytes => toBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+    hint: 'url-sicher · jwt, links, dateinamen'
+  },
+  hex: {
+    encode: bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(''),
+    hint: 'nur 0-9a-f · wenn ein tool hex verlangt'
+  }
 };
 
 const bytesInput = document.getElementById('bytes');
 const outputEl = document.getElementById('output');
 const entropyEl = document.getElementById('entropy');
+const formatHintEl = document.getElementById('format-hint');
 const warnEl = document.getElementById('weak-warning');
 const statusEl = document.getElementById('copied-msg');
 const historyWrap = document.getElementById('history-wrap');
@@ -281,8 +300,9 @@ function generate() {
 }
 
 function paint() {
-  const encode = FORMATS[currentFormat];
+  const { encode, hint } = FORMATS[currentFormat];
   const n = currentBytes.length;
+  formatHintEl.textContent = hint;
   outputEl.textContent = encode(currentBytes);
   entropyEl.textContent = `${n * 8} bit entropie · ${n} ${n === 1 ? 'byte' : 'bytes'}`;
   warnEl.hidden = n >= 16;
