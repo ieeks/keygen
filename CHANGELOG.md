@@ -7,7 +7,23 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-Nichts.
+### Hinzugefügt
+
+- Umschalter für das Farbschema oben rechts in der Karte
+
+### Geändert
+
+- Das Tool startet jetzt immer hell statt der Systemeinstellung zu folgen.
+  `prefers-color-scheme` wird nicht mehr ausgewertet, das Schema hängt an einem
+  `data-theme`-Attribut, das der Umschalter setzt. Die Wahl wird bewusst nicht
+  persistiert — eine gespeicherte Einstellung bräuchte `localStorage`, und das
+  Projekt schreibt nichts in den Browser-Speicher
+- `color-scheme` wird jetzt gesetzt, damit native Bedienelemente wie die
+  Spinner-Pfeile des Zahlenfelds zum gewählten Schema passen
+- Der Storage-Check im Smoke-Test prüft auf echten Zugriff
+  (`localStorage.`, `localStorage[`) statt auf die blosse Erwähnung des Wortes.
+  Vorher machte ein Kommentar, der die Abwesenheit von Storage erklärt, den
+  Build rot
 
 ## [1.0.0] — 2026-09-12
 

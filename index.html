@@ -6,6 +6,7 @@
 <title>Zufälliger Schlüssel Generator</title>
 <style>
   :root {
+    color-scheme: light;
     --bg: #ece7db;
     --card-bg: #ffffff;
     --border: #17140f;
@@ -15,17 +16,16 @@
     --accent-hover: #a5432a;
     --on-accent: #ffffff;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1c1a16;
-      --card-bg: #26231d;
-      --border: #7a7466;
-      --text-primary: #ece7db;
-      --text-secondary: #9a9384;
-      --accent: #d96a48;
-      --accent-hover: #e8825f;
-      --on-accent: #17140f;
-    }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1c1a16;
+    --card-bg: #26231d;
+    --border: #7a7466;
+    --text-primary: #ece7db;
+    --text-secondary: #9a9384;
+    --accent: #d96a48;
+    --accent-hover: #e8825f;
+    --on-accent: #17140f;
   }
   * { box-sizing: border-box; }
   body {
@@ -47,6 +47,18 @@
     max-width: 440px;
     width: 100%;
     box-shadow: 6px 6px 0 var(--accent);
+  }
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  #theme-toggle {
+    flex: none;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text-secondary);
   }
   .eyebrow {
     font-size: 12px;
@@ -192,7 +204,10 @@
 </head>
 <body>
   <div class="card">
-    <p class="eyebrow">manuel · vienna · dev</p>
+    <div class="card-head">
+      <p class="eyebrow">manuel · vienna · dev</p>
+      <button type="button" id="theme-toggle" aria-pressed="false"></button>
+    </div>
     <h1>random key~</h1>
 
     <div class="field">
@@ -261,6 +276,7 @@ const FORMATS = {
   }
 };
 
+const themeBtn = document.getElementById('theme-toggle');
 const bytesInput = document.getElementById('bytes');
 const outputEl = document.getElementById('output');
 const entropyEl = document.getElementById('entropy');
@@ -358,6 +374,28 @@ document.querySelectorAll('[data-preset]').forEach(btn => btn.addEventListener('
   bytesInput.value = btn.dataset.preset;
   generate();
 }));
+
+// Farbschema: Hell ist der Startzustand fuer alle. Die Wahl wird bewusst NICHT
+// gespeichert — das Projekt schreibt nichts in localStorage, auch keine
+// Einstellung (siehe SECURITY.md). Nach einem Reload ist wieder Hell aktiv.
+let theme = 'light';
+
+function applyTheme() {
+  const dark = theme === 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  themeBtn.textContent = dark ? '☀ hell' : '☾ dunkel';
+  themeBtn.setAttribute('aria-pressed', String(dark));
+  themeBtn.setAttribute('aria-label', dark
+    ? 'Zum hellen Farbschema wechseln'
+    : 'Zum dunklen Farbschema wechseln');
+}
+
+themeBtn.addEventListener('click', () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+});
+
+applyTheme();
 
 document.getElementById('gen').addEventListener('click', generate);
 bytesInput.addEventListener('change', generate);

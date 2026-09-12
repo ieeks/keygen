@@ -35,7 +35,8 @@ paar Minuten.
 - Die letzten 3 Schlüssel der Sitzung, gekürzt, je mit eigenem Copy-Button —
   nur im Arbeitsspeicher, nach einem Reload weg
 - Copy-to-Clipboard, Rückmeldung blendet nach 2 Sekunden aus
-- Dark Mode über `prefers-color-scheme`
+- Heller Start, Umschalter oben rechts auf dunkel. Die Wahl wird bewusst nicht
+  gespeichert — nach einem Reload ist wieder Hell aktiv (siehe unten)
 - Läuft komplett clientseitig und offline
 
 ### Welches Format wann
@@ -53,6 +54,18 @@ Der Grund für `base64url`: In einer URL steht `+` für ein Leerzeichen. Ein
 base64-Schlüssel mit `+` darin kommt am anderen Ende verstümmelt an — und nur
 dann, wenn zufällig ein `+` enthalten ist, was den Fehler sporadisch und
 entsprechend lästig macht. `base64url` nutzt `-` und `_` und lässt das Padding weg.
+
+### Farbschema
+
+Das Tool startet immer hell und hat oben rechts einen Umschalter. Es folgt
+**nicht** der Systemeinstellung, und es merkt sich die Wahl **nicht** über einen
+Reload hinweg.
+
+Beides ist Absicht: Eine gespeicherte Einstellung bräuchte `localStorage`, und
+dieses Projekt schreibt nichts in den Browser-Speicher — auch keine
+Bedienvorliebe. Diese Zusage ist in zwei Sätzen prüfbar, und sie ist mehr wert
+als ein Farbschema, das sich etwas merkt. Der Preis ist ein Klick pro Aufruf,
+wenn man das andere Schema will.
 
 ## Lokal starten
 
