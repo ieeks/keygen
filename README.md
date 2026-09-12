@@ -1,22 +1,58 @@
 # keygen
 
-Zufälliger kryptografisch sicherer Schlüssel-Generator — das Web-Äquivalent zu `openssl rand -base64 32`.
+Kryptografisch sichere Zufallsschlüssel im Browser — ohne Server, ohne Build-Step,
+ohne eine einzige Netzwerkanfrage.
+
+[![Deploy](https://github.com/ieeks/keygen/actions/workflows/deploy.yml/badge.svg)](https://github.com/ieeks/keygen/actions/workflows/deploy.yml)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-c1502f)](LICENSE)
+
+**Live: [ieeks.github.io/keygen](https://ieeks.github.io/keygen/)**
+
+![Screenshot des Tools](docs/screenshot.png)
+
+<!-- TODO: docs/screenshot.png existiert noch nicht. Screenshot aufnehmen und
+     ablegen — bis dahin bleibt das Bild oben ein toter Link. -->
 
 Teil der [manuel.tools](https://manuel.tools) Toolbox. Kategorie: `dev`.
 
-## Was es macht
+## Warum
 
-- Erzeugt Zufallsbytes über `crypto.getRandomValues()` (Web Crypto API)
-- Ausgabe als Base64, base64url (`-`/`_`, ohne Padding) oder Hex — Umschalten kodiert
-  denselben Schlüssel neu, es wird kein neuer erzeugt. Unter dem Umschalter steht eine
-  Zeile, wofür das jeweilige Format gedacht ist
-- Byte-Länge einstellbar (1–256, Default 32), Presets für 16 / 32 / 64
+`openssl rand -base64 32` ist die richtige Antwort, wenn ein Terminal offen ist.
+Manchmal ist keins da: fremder Rechner, Handy, oder man steht in einem Formular,
+das jetzt ein Secret will. Dann tippt man erfahrungsgemäß etwas aus dem Kopf,
+und das ist schlechter als jeder Zufallsgenerator.
+
+Dieses Tool ist dieselbe Operation als Webseite — und zwar so gebaut, dass man
+ihr das zutrauen kann: eine Datei, kein Server, keine Requests, nachlesbar in ein
+paar Minuten.
+
+## Funktionsumfang
+
+- Zufallsbytes über `crypto.getRandomValues()`, den CSPRNG des Browsers
+- Byte-Länge 1–256, Voreinstellung 32, Presets für 16 / 32 / 64
 - Entropie-Anzeige in Bit, Warnung unterhalb von 16 Bytes
-- Die letzten 3 Schlüssel der Sitzung, gekürzt und mit eigenem Copy-Button —
-  nur im Arbeitsspeicher, nicht persistiert
+- Drei Ausgabeformate, umschaltbar ohne neuen Schlüssel zu erzeugen
+- Die letzten 3 Schlüssel der Sitzung, gekürzt, je mit eigenem Copy-Button —
+  nur im Arbeitsspeicher, nach einem Reload weg
 - Copy-to-Clipboard, Rückmeldung blendet nach 2 Sekunden aus
 - Dark Mode über `prefers-color-scheme`
-- Läuft komplett clientseitig, keine Netzwerkaufrufe, kein Build-Step
+- Läuft komplett clientseitig und offline
+
+### Welches Format wann
+
+Alle drei kodieren dieselben Zufallsbytes. Die Wahl ändert die Schreibweise,
+nicht die Stärke — 32 Bytes sind in jedem Format 256 bit.
+
+| Format | Länge bei 32 Byte | Wofür |
+| --- | --- | --- |
+| `base64` | 44 Zeichen | Standard. `.env`-Dateien, Configs, Secrets in Umgebungsvariablen |
+| `base64url` | 43 Zeichen | Sobald der Wert in eine URL kommt: JWTs, Links, Dateinamen |
+| `hex` | 64 Zeichen | Wenn ein Tool Hex verlangt, oder der Wert durch Kanäle muss, die an Sonderzeichen scheitern |
+
+Der Grund für `base64url`: In einer URL steht `+` für ein Leerzeichen. Ein
+base64-Schlüssel mit `+` darin kommt am anderen Ende verstümmelt an — und nur
+dann, wenn zufällig ein `+` enthalten ist, was den Fehler sporadisch und
+entsprechend lästig macht. `base64url` nutzt `-` und `_` und lässt das Padding weg.
 
 ## Lokal starten
 
@@ -25,33 +61,57 @@ python3 -m http.server 8000
 # → http://localhost:8000
 ```
 
+`index.html` lässt sich auch direkt im Browser öffnen — es gibt nichts zu bauen.
+
 ## Tests
 
 ```bash
 node scripts/smoke-test.mjs
 ```
 
-Kein Build-Step, keine Dependencies — blankes Node genügt. Der Test liest das echte
-`index.html`, schneidet das Inline-Script heraus und führt es mit einem minimalen
-DOM-Stub aus. Geprüft werden Syntax, die Constraints (kein `Math.random`, kein
-Storage, keine externen Ressourcen), Ausgabelängen für 1 / 32 / 256 Byte, alle drei
-Zeichensätze, die Byte-Eingabe inklusive Randfälle und das History-Limit.
+Ohne Build-Step und ohne Dependencies. Der Test liest das echte `index.html`,
+schneidet das Inline-Script heraus und führt es in `node:vm` mit einem minimalen
+DOM-Stub aus — geprüft wird also der ausgelieferte Code, keine Kopie davon.
 
-Läuft in CI bei jedem Push und jedem Pull Request. Der Deploy-Job startet erst,
-wenn der Test grün ist.
+Abgedeckt sind Syntax, die Constraints selbst (kein `Math.random`, kein Storage,
+keine externen Ressourcen), Ausgabelängen für 1 / 32 / 256 Byte, alle drei
+Zeichensätze, die Byte-Eingabe inklusive Randfälle, Entropie-Zeile, Warnschwelle,
+History-Limit und die Format-Hinweise.
+
+Läuft in CI bei jedem Push und jedem Pull Request. Der Deploy startet erst, wenn
+der Test grün ist.
 
 ## Deployment
 
-GitHub Pages via Actions (`.github/workflows/deploy.yml`), Push auf `main` deployt automatisch.
+GitHub Pages über Actions (`.github/workflows/deploy.yml`). Push auf `main`
+deployt automatisch, nachdem der Test durchgelaufen ist.
 
-Live: `https://ieeks.github.io/keygen/`
+Das Pages-Artefakt enthält nur die Anwendung — Dokumentation und Prompts werden
+nicht mit veröffentlicht. Neue statische Assets müssen im Workflow bewusst
+ergänzt werden.
 
-## Sicherheitshinweis
+## Sicherheit
 
-`crypto.getRandomValues()` ist der CSPRNG des Browsers und für Schlüsselmaterial geeignet.
-Der Schlüssel verlässt niemals den Browser — kein Logging, kein Server, keine Analytics.
+`crypto.getRandomValues()` ist der kryptografisch sichere Zufallsgenerator des
+Browsers und für Schlüsselmaterial geeignet. Der Schlüssel verlässt den Browser
+nie: keine Netzwerkanfrage, kein Server, kein Storage, kein Logging, keine
+Analytics.
 
-Sichere Zufallsquelle und ausreichende Schlüssellänge sind zwei verschiedene Dinge: Die
-Quelle ist immer sicher, die nötige Länge hängt vom Einsatzzweck ab. 32 Bytes (256 bit)
-sind der sinnvolle Standard für allgemeine Secrets; unterhalb von 16 Bytes warnt das Tool.
-Die History liegt ausschließlich im Arbeitsspeicher und ist nach einem Reload weg.
+Sichere Zufallsquelle und ausreichende Schlüssellänge sind zwei verschiedene
+Dinge. Die Quelle ist immer sicher; die nötige Länge hängt vom Einsatzzweck ab.
+32 Bytes sind der sinnvolle Standard, unterhalb von 16 Bytes warnt das Tool.
+
+Threat Model, Restrisiken und der Hinweis, wann man besser doch `openssl` im
+Terminal nimmt: [`SECURITY.md`](SECURITY.md).
+
+## Dokumentation
+
+- [`CHANGELOG.md`](CHANGELOG.md) — Änderungen nach Keep a Changelog
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — Konventionen, Checks vor dem Push
+- [`SECURITY.md`](SECURITY.md) — Threat Model und Restrisiken
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — Architekturentscheidungen als ADRs
+- [`LICENSE`](LICENSE) — MIT
+
+## Lizenz
+
+[MIT](LICENSE) — Copyright (c) 2026 Manuel
