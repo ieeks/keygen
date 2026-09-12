@@ -192,7 +192,7 @@
     <div class="field">
       <label class="field-label" for="bytes">Bytes</label>
       <div class="controls">
-        <input type="number" id="bytes" value="32" min="1" max="256">
+        <input type="number" id="bytes" value="32" min="1" max="256" step="1">
         <div class="presets" role="group" aria-label="Byte-Länge als Preset">
           <button type="button" data-preset="16" aria-label="16 Bytes">16</button>
           <button type="button" data-preset="32" aria-label="32 Bytes">32</button>
@@ -227,6 +227,9 @@
 <script>
 const MAX_HISTORY = 3;
 const PREVIEW_CHARS = 12;
+const MIN_BYTES = 1;
+const MAX_BYTES = 256;
+const DEFAULT_BYTES = 32;
 
 const toBase64 = bytes => {
   let binary = '';
@@ -255,10 +258,14 @@ let currentFormat = 'base64';
 let currentBytes = null;
 let statusTimer = null;
 
+// valueAsNumber statt parseInt: parseInt("1e2") ergaebe 1 statt 100 und schnitte
+// Dezimalstellen still ab. Leeres oder unlesbares Feld faellt auf den Default
+// zurueck; ein lesbarer Wert ausserhalb 1-256 wird geklemmt, nicht zurueckgesetzt.
 function byteCount() {
-  let n = parseInt(bytesInput.value, 10);
-  if (isNaN(n) || n < 1) n = 32;
-  if (n > 256) n = 256;
+  const raw = bytesInput.valueAsNumber;
+  const n = Number.isNaN(raw)
+    ? DEFAULT_BYTES
+    : Math.min(MAX_BYTES, Math.max(MIN_BYTES, Math.round(raw)));
   bytesInput.value = n;
   return n;
 }
