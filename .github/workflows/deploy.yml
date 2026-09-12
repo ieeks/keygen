@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Auch auf Pull Requests, damit eine Regression vor dem Merge auffaellt und
+  # nicht erst beim Deploy. Der deploy-Job laeuft dabei nicht, siehe if unten.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -10,12 +14,25 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Smoke-Test
+        run: node scripts/smoke-test.mjs
+
   deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    # Nur der Deploy serialisiert auf Pages — sonst wuerde ein PR-Lauf einen
+    # laufenden Deploy abbrechen.
+    concurrency:
+      group: pages
+      cancel-in-progress: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

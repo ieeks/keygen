@@ -31,7 +31,7 @@ GitHub Pages via `.github/workflows/deploy.yml`. Push auf `main` → live auf `i
 
 Offen aus dem Review in Issue #2:
 - [x] `valueAsNumber` statt `parseInt` für die Byte-Eingabe (Finding 4)
-- [ ] Smoke-Test vor dem Deploy (Finding 5)
+- [x] Smoke-Test vor dem Deploy (Finding 5)
 - [x] Pages-Artefakt auf die App beschränken statt `path: '.'` (Finding 6)
 
 ## Byte-Eingabe
@@ -39,6 +39,13 @@ Offen aus dem Review in Issue #2:
 Dezimalstellen still ab. Regel: leeres oder unlesbares Feld → Default 32; ein
 lesbarer Wert wird gerundet und auf 1–256 geklemmt. „Außerhalb des Bereichs" und
 „gar nichts eingegeben" sind bewusst zwei verschiedene Fälle.
+
+## Tests
+`node scripts/smoke-test.mjs` — ohne Build-Step, ohne Dependencies. Der Test liest
+`index.html`, schneidet das Inline-Script heraus und führt es mit einem DOM-Stub in
+`node:vm` aus, prüft also den ausgelieferten Code und keine Kopie. Bei funktionalen
+Änderungen mitpflegen. Läuft in CI auf Push und Pull Request, der Deploy hängt per
+`needs: test` daran.
 
 ## Pages-Artefakt
 `deploy.yml` baut ein `_site/` und lädt nur das hoch. Neue statische Assets

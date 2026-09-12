@@ -24,6 +24,21 @@ python3 -m http.server 8000
 # → http://localhost:8000
 ```
 
+## Tests
+
+```bash
+node scripts/smoke-test.mjs
+```
+
+Kein Build-Step, keine Dependencies — blankes Node genügt. Der Test liest das echte
+`index.html`, schneidet das Inline-Script heraus und führt es mit einem minimalen
+DOM-Stub aus. Geprüft werden Syntax, die Constraints (kein `Math.random`, kein
+Storage, keine externen Ressourcen), Ausgabelängen für 1 / 32 / 256 Byte, alle drei
+Zeichensätze, die Byte-Eingabe inklusive Randfälle und das History-Limit.
+
+Läuft in CI bei jedem Push und jedem Pull Request. Der Deploy-Job startet erst,
+wenn der Test grün ist.
+
 ## Deployment
 
 GitHub Pages via Actions (`.github/workflows/deploy.yml`), Push auf `main` deployt automatisch.
