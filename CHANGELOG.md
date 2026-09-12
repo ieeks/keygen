@@ -25,6 +25,11 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
   Vorher machte ein Kommentar, der die Abwesenheit von Storage erklärt, den
   Build rot
 
+### Behoben
+
+- Die Dokumentation nannte durchgehend `ieeks.github.io/keygen` als Live-Adresse.
+  Kanonisch ist die Custom Domain `https://manuel.tools/keygen/`
+
 ## [1.0.0] — 2026-09-12
 
 Erster Release. Inhalt entspricht dem aktuellen Stand von `index.html`.

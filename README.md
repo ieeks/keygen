@@ -6,7 +6,7 @@ ohne eine einzige Netzwerkanfrage.
 [![Deploy](https://github.com/ieeks/keygen/actions/workflows/deploy.yml/badge.svg)](https://github.com/ieeks/keygen/actions/workflows/deploy.yml)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-c1502f)](LICENSE)
 
-**Live: [ieeks.github.io/keygen](https://ieeks.github.io/keygen/)**
+**Live: [manuel.tools/keygen](https://manuel.tools/keygen/)**
 
 ![Screenshot des Tools](docs/screenshot.png)
 

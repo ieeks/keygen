@@ -19,7 +19,11 @@ manuel.tools Design-Sprache:
 - Buttons: 2px Rahmen, 8px Radius, `scale(0.97)` auf `:active`
 
 ## Deployment
-GitHub Pages via `.github/workflows/deploy.yml`. Push auf `main` → live auf `ieeks.github.io/keygen`.
+GitHub Pages via `.github/workflows/deploy.yml`. Push auf `main` → live auf
+`https://manuel.tools/keygen/`.
+
+Die kanonische Adresse ist die Custom Domain, nicht `ieeks.github.io/keygen`.
+Letztere leitet weiter, sollte aber nicht mehr verlinkt werden.
 
 ## Offene Punkte / Backlog
 - [x] Hex-Output zusätzlich zu Base64 (Toggle)
