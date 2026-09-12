@@ -22,12 +22,22 @@ manuel.tools Design-Sprache:
 GitHub Pages via `.github/workflows/deploy.yml`. Push auf `main` → live auf `ieeks.github.io/keygen`.
 
 ## Offene Punkte / Backlog
-- Hex-Output zusätzlich zu Base64 (Toggle)
-- Base64url-Variante (`-` und `_` statt `+` und `/`, ohne Padding) — für JWT/URL-Secrets
-- Preset-Buttons: 16 / 32 / 64 Bytes
-- Entropie-Anzeige in Bit
-- Dark-Mode über `prefers-color-scheme`
-- History der letzten 3 Keys in der Session (nur In-Memory, nicht persistiert)
+- [x] Hex-Output zusätzlich zu Base64 (Toggle)
+- [x] Base64url-Variante (`-` und `_` statt `+` und `/`, ohne Padding) — für JWT/URL-Secrets
+- [x] Preset-Buttons: 16 / 32 / 64 Bytes
+- [x] Entropie-Anzeige in Bit
+- [x] Dark-Mode über `prefers-color-scheme`
+- [x] History der letzten 3 Keys in der Session (nur In-Memory, nicht persistiert)
+
+Offen aus dem Review in Issue #2:
+- [ ] `valueAsNumber` statt `parseInt` für die Byte-Eingabe (Finding 4)
+- [ ] Smoke-Test vor dem Deploy (Finding 5)
+- [ ] Pages-Artefakt auf die App beschränken statt `path: '.'` (Finding 6)
+
+## Dark-Mode-Palette
+Im Dark Mode trägt der Akzent **dunkle** Schrift (`--on-accent: #17140f`), nicht weiße —
+weiß auf `#d96a48` erreicht nur 3.44:1 und fällt durch. Der Rahmen wird zu `#7a7466`,
+weil `#17140f` auf dunklem Grund unsichtbar wäre (1.65:1).
 
 ## Doku-Konventionen
 - `CHANGELOG.md` nach Keep a Changelog, SemVer — bei jedem funktionalen Change mitpflegen

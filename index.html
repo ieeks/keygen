@@ -12,6 +12,20 @@
     --text-primary: #17140f;
     --text-secondary: #6b665a;
     --accent: #c1502f;
+    --accent-hover: #a5432a;
+    --on-accent: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a16;
+      --card-bg: #26231d;
+      --border: #7a7466;
+      --text-primary: #ece7db;
+      --text-secondary: #9a9384;
+      --accent: #d96a48;
+      --accent-hover: #e8825f;
+      --on-accent: #17140f;
+    }
   }
   * { box-sizing: border-box; }
   body {
@@ -49,23 +63,18 @@
     color: var(--accent);
     margin: 0 0 18px;
   }
-  .row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  label {
+  .field { margin-bottom: 16px; }
+  .field-label {
+    display: block;
     font-size: 13px;
     color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    margin-bottom: 8px;
   }
+  .controls { display: flex; gap: 8px; }
   input[type="number"] {
-    width: 70px;
+    width: 82px;
     padding: 8px;
     border: 2px solid var(--border);
     border-radius: 8px;
@@ -75,7 +84,6 @@
     font-size: 14px;
   }
   button {
-    flex: 1;
     padding: 10px 14px;
     border: 2px solid var(--border);
     border-radius: 8px;
@@ -86,28 +94,65 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
-    transition: transform 0.1s, background 0.15s;
+    transition: transform 0.1s, background 0.15s, color 0.15s;
   }
   button:hover { background: var(--bg); }
   button:active { transform: scale(0.97); }
-  #copy-btn {
-    width: 100%;
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
+  .presets { display: flex; gap: 8px; margin-left: auto; }
+  .presets button { min-width: 54px; padding: 10px 6px; }
+  .segmented { display: flex; }
+  .segmented button {
+    flex: 1;
+    border-radius: 0;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    text-transform: none;
   }
-  #copy-btn:hover { background: #a5432a; }
+  .segmented button:first-child {
+    border-radius: 8px 0 0 8px;
+    border-left-width: 2px;
+  }
+  .segmented button:last-child {
+    border-radius: 0 8px 8px 0;
+    border-right-width: 2px;
+  }
+  .segmented button.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
   #output {
+    display: block;
     background: var(--bg);
     border: 2px solid var(--border);
     border-radius: 8px;
     padding: 16px;
-    margin-bottom: 14px;
     word-break: break-all;
     font-size: 13px;
     line-height: 1.6;
     min-height: 20px;
   }
+  #entropy {
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    margin: 8px 0 0;
+  }
+  #weak-warning {
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin: 4px 0 0;
+  }
+  #gen { width: 100%; margin-top: 14px; }
+  #copy-btn {
+    width: 100%;
+    margin-top: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+  }
+  #copy-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
   #copied-msg {
     font-size: 12px;
     color: var(--accent);
@@ -115,59 +160,183 @@
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    visibility: hidden;
+    min-height: 14px;
   }
+  #history-wrap {
+    margin-top: 18px;
+    border-top: 2px solid var(--border);
+    padding-top: 14px;
+  }
+  #history { list-style: none; margin: 0; padding: 0; }
+  #history li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .history-key {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-secondary);
+    word-break: break-all;
+  }
+  .history-copy { padding: 4px 10px; font-size: 12px; }
+  [hidden] { display: none; }
 </style>
 </head>
 <body>
   <div class="card">
     <p class="eyebrow">manuel · vienna · dev</p>
     <h1>random key~</h1>
-    <div class="row">
-      <label>Bytes
+
+    <div class="field">
+      <label class="field-label" for="bytes">Bytes</label>
+      <div class="controls">
         <input type="number" id="bytes" value="32" min="1" max="256">
-      </label>
-      <button id="gen">↻ neu</button>
+        <div class="presets" role="group" aria-label="Byte-Länge als Preset">
+          <button type="button" data-preset="16" aria-label="16 Bytes">16</button>
+          <button type="button" data-preset="32" aria-label="32 Bytes">32</button>
+          <button type="button" data-preset="64" aria-label="64 Bytes">64</button>
+        </div>
+      </div>
     </div>
-    <div id="output"></div>
-    <button id="copy-btn">⧉ kopieren</button>
-    <p id="copied-msg">kopiert</p>
+
+    <div class="field">
+      <span class="field-label" id="format-label">Format</span>
+      <div class="segmented" role="group" aria-labelledby="format-label">
+        <button type="button" class="is-active" data-format="base64" aria-pressed="true">base64</button>
+        <button type="button" data-format="base64url" aria-pressed="false">base64url</button>
+        <button type="button" data-format="hex" aria-pressed="false">hex</button>
+      </div>
+    </div>
+
+    <output id="output" aria-label="Generierter Schlüssel"></output>
+    <p id="entropy"></p>
+    <p id="weak-warning" hidden>⚠ unter 16 bytes · zu wenig entropie für produktivschlüssel</p>
+
+    <button id="gen" aria-label="Neuen Schlüssel erzeugen">↻ neu</button>
+    <button id="copy-btn" aria-label="Schlüssel in die Zwischenablage kopieren">⧉ kopieren</button>
+    <p id="copied-msg" role="status" aria-live="polite"></p>
+
+    <div id="history-wrap" hidden>
+      <span class="field-label">Zuletzt · nur in dieser Sitzung</span>
+      <ul id="history"></ul>
+    </div>
   </div>
 
 <script>
-function generateKey(numBytes) {
-  const arr = new Uint8Array(numBytes);
-  crypto.getRandomValues(arr);
-  let binary = '';
-  arr.forEach(b => binary += String.fromCharCode(b));
-  return btoa(binary);
-}
+const MAX_HISTORY = 3;
+const PREVIEW_CHARS = 12;
 
-function render() {
-  const bytesInput = document.getElementById('bytes');
+const toBase64 = bytes => {
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+};
+
+const FORMATS = {
+  base64: toBase64,
+  base64url: bytes => toBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+  hex: bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+};
+
+const bytesInput = document.getElementById('bytes');
+const outputEl = document.getElementById('output');
+const entropyEl = document.getElementById('entropy');
+const warnEl = document.getElementById('weak-warning');
+const statusEl = document.getElementById('copied-msg');
+const historyWrap = document.getElementById('history-wrap');
+const historyList = document.getElementById('history');
+const formatButtons = [...document.querySelectorAll('[data-format]')];
+
+// Nur im Speicher, bewusst nicht persistiert — siehe SECURITY-Hinweis im README.
+const history = [];
+let currentFormat = 'base64';
+let currentBytes = null;
+let statusTimer = null;
+
+function byteCount() {
   let n = parseInt(bytesInput.value, 10);
   if (isNaN(n) || n < 1) n = 32;
   if (n > 256) n = 256;
   bytesInput.value = n;
-  document.getElementById('output').textContent = generateKey(n);
-  document.getElementById('copied-msg').style.visibility = 'hidden';
+  return n;
 }
 
-document.getElementById('gen').addEventListener('click', render);
-document.getElementById('bytes').addEventListener('change', render);
+function generate() {
+  if (currentBytes) {
+    history.unshift(currentBytes);
+    if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
+  }
+  currentBytes = new Uint8Array(byteCount());
+  crypto.getRandomValues(currentBytes);
+  paint();
+}
 
-document.getElementById('copy-btn').addEventListener('click', async () => {
-  const text = document.getElementById('output').textContent;
+function paint() {
+  const encode = FORMATS[currentFormat];
+  const n = currentBytes.length;
+  outputEl.textContent = encode(currentBytes);
+  entropyEl.textContent = `${n * 8} bit entropie · ${n} ${n === 1 ? 'byte' : 'bytes'}`;
+  warnEl.hidden = n >= 16;
+  paintHistory(encode);
+}
+
+function paintHistory(encode) {
+  historyWrap.hidden = history.length === 0;
+  historyList.replaceChildren(...history.map(bytes => {
+    const full = encode(bytes);
+    const preview = full.length > PREVIEW_CHARS ? full.slice(0, PREVIEW_CHARS) + '…' : full;
+    const item = document.createElement('li');
+    const key = document.createElement('span');
+    key.className = 'history-key';
+    key.textContent = preview;
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'history-copy';
+    copyBtn.textContent = '⧉';
+    copyBtn.setAttribute('aria-label', `Schlüssel ${preview} kopieren`);
+    copyBtn.addEventListener('click', () => copy(full));
+    item.append(key, copyBtn);
+    return item;
+  }));
+}
+
+function status(message) {
+  clearTimeout(statusTimer);
+  statusEl.textContent = message;
+  statusTimer = setTimeout(() => { statusEl.textContent = ''; }, 2000);
+}
+
+async function copy(text) {
   try {
     await navigator.clipboard.writeText(text);
-    document.getElementById('copied-msg').style.visibility = 'visible';
+    status('kopiert');
   } catch (e) {
-    document.getElementById('copied-msg').textContent = 'kopieren fehlgeschlagen';
-    document.getElementById('copied-msg').style.visibility = 'visible';
+    status('kopieren fehlgeschlagen');
   }
-});
+}
 
-render();
+formatButtons.forEach(btn => btn.addEventListener('click', () => {
+  currentFormat = btn.dataset.format;
+  formatButtons.forEach(other => {
+    const active = other === btn;
+    other.classList.toggle('is-active', active);
+    other.setAttribute('aria-pressed', String(active));
+  });
+  paint(); // derselbe Schlüssel, nur neu kodiert — erzeugt bewusst keinen neuen
+}));
+
+document.querySelectorAll('[data-preset]').forEach(btn => btn.addEventListener('click', () => {
+  bytesInput.value = btn.dataset.preset;
+  generate();
+}));
+
+document.getElementById('gen').addEventListener('click', generate);
+bytesInput.addEventListener('change', generate);
+document.getElementById('copy-btn').addEventListener('click', () => copy(outputEl.textContent));
+
+generate();
 </script>
 </body>
 </html>
