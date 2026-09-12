@@ -17,7 +17,8 @@ gh api -X POST repos/ieeks/keygen/pages -f build_type=workflow
 ```
 
 Alternativ im Web: Settings → Pages → Source = **GitHub Actions**.
-Danach live auf `https://ieeks.github.io/keygen/`.
+Danach live auf `https://manuel.tools/keygen/` (Custom Domain, in den
+Pages-Einstellungen hinterlegt).
 
 ## 3. Claude Code laufen lassen
 
@@ -39,7 +40,7 @@ Neue Kachel in der Toolbox, Kategorie `dev`:
   title: "Key Generator",
   subtitle: "Dev · Crypto",
   description: "Kryptografisch sichere Zufallsschlüssel. Base64, base64url, hex. Läuft offline im Browser.",
-  url: "https://ieeks.github.io/keygen/",
+  url: "https://manuel.tools/keygen/",
   category: "dev",
   status: "live"
 }

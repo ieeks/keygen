@@ -21,7 +21,9 @@ const check = (label, ok, detail = '') => {
 
 // --- 1. Constraints aus CLAUDE.md -----------------------------------------
 check('kein Math.random', !/Math\.random/.test(html));
-check('kein localStorage/sessionStorage', !/(local|session)Storage/.test(html));
+// Auf echten Zugriff pruefen, nicht auf die blosse Erwaehnung: ein Kommentar, der
+// erklaert warum es keinen Storage gibt, darf den Build nicht rot machen.
+check('kein localStorage/sessionStorage', !/(local|session)Storage\s*[.\[]/.test(html));
 check('kein fetch/XHR', !/\bfetch\s*\(|XMLHttpRequest/.test(html));
 check('keine externen Ressourcen', !/(src|href)\s*=\s*["']https?:/i.test(html));
 check('crypto.getRandomValues wird benutzt', /crypto\.getRandomValues/.test(html));
@@ -47,8 +49,13 @@ const el = (id = '', attrs = {}) => {
     id, textContent: '', className: '', hidden: false, type: '', value: '',
     children: [], dataset: { ...attrs }, listeners: {},
     classList: { toggle() {}, add() {}, remove() {} },
-    setAttribute(k, v) { if (k.startsWith('data-')) node.dataset[k.slice(5)] = v; },
-    getAttribute(k) { return node.dataset[k.replace(/^data-/, '')]; },
+    // Alle Attribute ablegen, nicht nur data-* — sonst laesst sich aria-* nicht pruefen.
+    attrs: Object.fromEntries(Object.entries(attrs).map(([k, v]) => ['data-' + k, v])),
+    setAttribute(k, v) {
+      node.attrs[k] = String(v);
+      if (k.startsWith('data-')) node.dataset[k.slice(5)] = String(v);
+    },
+    getAttribute(k) { return k in node.attrs ? node.attrs[k] : null; },
     addEventListener(type, fn) { (node.listeners[type] ||= []).push(fn); },
     append(...kids) { node.children.push(...kids); },
     replaceChildren(...kids) { node.children = kids; },
@@ -67,7 +74,7 @@ const el = (id = '', attrs = {}) => {
 
 const nodes = {
   bytes: el('bytes'), output: el('output'), entropy: el('entropy'),
-  'format-hint': el('format-hint'),
+  'format-hint': el('format-hint'), 'theme-toggle': el('theme-toggle'),
   'weak-warning': el('weak-warning'), 'copied-msg': el('copied-msg'),
   'history-wrap': el('history-wrap'), history: el('history'),
   gen: el('gen'), 'copy-btn': el('copy-btn'),
@@ -76,8 +83,10 @@ nodes.bytes.value = '32';
 const formatBtns = ['base64', 'base64url', 'hex'].map(f => el('', { format: f }));
 const presetBtns = ['16', '32', '64'].map(p => el('', { preset: p }));
 
+const htmlEl = el('html');
 const ctx = createContext({
   document: {
+    documentElement: htmlEl,
     getElementById: id => nodes[id],
     querySelectorAll: sel => sel === '[data-format]' ? formatBtns
       : sel === '[data-preset]' ? presetBtns : [],
@@ -140,6 +149,18 @@ for (const [fmt, expected] of Object.entries(HINTS)) {
   check(`Hinweis fuer ${fmt}`, nodes['format-hint'].textContent === expected, nodes['format-hint'].textContent);
 }
 pick('base64');
+
+// --- 7c. Farbschema-Umschalter ----------------------------------------------
+const themeBtn = nodes['theme-toggle'];
+check('Startzustand ist hell', htmlEl.getAttribute('data-theme') === 'light', htmlEl.getAttribute('data-theme'));
+check('Button bietet Dunkel an', themeBtn.textContent === '\u263e dunkel', themeBtn.textContent);
+check('aria-pressed initial false', themeBtn.getAttribute('aria-pressed') === 'false');
+themeBtn.click();
+check('nach Klick dunkel', htmlEl.getAttribute('data-theme') === 'dark', htmlEl.getAttribute('data-theme'));
+check('Button bietet Hell an', themeBtn.textContent === '\u2600 hell', themeBtn.textContent);
+check('aria-pressed dann true', themeBtn.getAttribute('aria-pressed') === 'true');
+themeBtn.click();
+check('zurueck auf hell', htmlEl.getAttribute('data-theme') === 'light', htmlEl.getAttribute('data-theme'));
 
 // --- 8. History -------------------------------------------------------------
 setBytes(32);

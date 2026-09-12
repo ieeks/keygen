@@ -54,7 +54,8 @@ Diese Punkte kann das Tool grundsätzlich nicht abdecken:
   Historie oder eine Synchronisierung auf andere Geräte.
 - **Blicke über die Schulter, Screenshots, Screensharing.** Der Schlüssel steht
   im Klartext auf dem Bildschirm, die History der letzten drei ebenso.
-- **Auslieferungsweg.** Du lädst die Seite über HTTPS von GitHub Pages. Wer den
+- **Auslieferungsweg.** Du lädst die Seite über HTTPS von GitHub Pages
+  (`manuel.tools`, erzwungenes HTTPS). Wer den
   Auslieferungsweg oder das Repository kontrolliert, könnte eine veränderte
   Version ausspielen. Wenn du das ausschließen willst: Datei herunterladen,
   durchlesen, lokal öffnen.

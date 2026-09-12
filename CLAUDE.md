@@ -19,14 +19,18 @@ manuel.tools Design-Sprache:
 - Buttons: 2px Rahmen, 8px Radius, `scale(0.97)` auf `:active`
 
 ## Deployment
-GitHub Pages via `.github/workflows/deploy.yml`. Push auf `main` → live auf `ieeks.github.io/keygen`.
+GitHub Pages via `.github/workflows/deploy.yml`. Push auf `main` → live auf
+`https://manuel.tools/keygen/`.
+
+Die kanonische Adresse ist die Custom Domain, nicht `ieeks.github.io/keygen`.
+Letztere leitet weiter, sollte aber nicht mehr verlinkt werden.
 
 ## Offene Punkte / Backlog
 - [x] Hex-Output zusätzlich zu Base64 (Toggle)
 - [x] Base64url-Variante (`-` und `_` statt `+` und `/`, ohne Padding) — für JWT/URL-Secrets
 - [x] Preset-Buttons: 16 / 32 / 64 Bytes
 - [x] Entropie-Anzeige in Bit
-- [x] Dark-Mode über `prefers-color-scheme`
+- [x] Dark-Mode (inzwischen als Umschalter statt über `prefers-color-scheme`)
 - [x] History der letzten 3 Keys in der Session (nur In-Memory, nicht persistiert)
 
 Offen aus dem Review in Issue #2:
@@ -52,7 +56,12 @@ lesbarer Wert wird gerundet und auf 1–256 geklemmt. „Außerhalb des Bereichs
 müssen dort bewusst ergänzt werden — Allowlist, damit nicht versehentlich
 wieder Doku und Prompts auf der Live-Site landen.
 
-## Dark-Mode-Palette
+## Farbschema
+Das Tool startet **immer hell** und folgt nicht `prefers-color-scheme`. Dunkel hängt
+an `:root[data-theme="dark"]`, gesetzt vom Umschalter oben rechts. Die Wahl wird
+**nicht** persistiert: Das würde `localStorage` brauchen, und das Projekt schreibt
+nichts in den Browser-Speicher — auch keine Bedienvorliebe. Der Smoke-Test erzwingt das.
+
 Im Dark Mode trägt der Akzent **dunkle** Schrift (`--on-accent: #17140f`), nicht weiße —
 weiß auf `#d96a48` erreicht nur 3.44:1 und fällt durch. Der Rahmen wird zu `#7a7466`,
 weil `#17140f` auf dunklem Grund unsichtbar wäre (1.65:1).
